@@ -138,7 +138,8 @@ def onAction(data):
         
         
     elif aid == TP_PLUGIN_ACTIONS['WriteJson']['id']:
-        write_json_to_file(data['data'][0]['value'], data['data'][1]['value'], data['data'][2]['value'])
+        ensure_ascii = data['data'][3]['value'].strip().lower() == 'true'
+        write_json_to_file(data['data'][0]['value'], data['data'][1]['value'], data['data'][2]['value'], ensure_ascii)
     else:
         g_log.warning("Got unknown action ID: " + aid)
 
