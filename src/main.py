@@ -91,7 +91,7 @@ def onAction(data):
                     }
                 )
         
-    if aid == TP_PLUGIN_ACTIONS['setupRequest']['id']:
+    elif aid == TP_PLUGIN_ACTIONS['setupRequest']['id']:
         if data['data'][0]['value'] != "" and (listener := findListener(data['data'][0]['value'])):
             listener[data['data'][0]['value']]['thread'] = Thread(target=makeRequests, args=(data['data'][1]['value'], data['data'][2]['value'],
             data['data'][3]['value'], data['data'][4]['value'], data['data'][5]['value'], listener))
@@ -99,7 +99,7 @@ def onAction(data):
         
         
         
-    if aid == TP_PLUGIN_ACTIONS['ParseData']['id']:
+    elif aid == TP_PLUGIN_ACTIONS['ParseData']['id']:
         g_log.debug(f"Parse Data Action: {data}")
         
         if data['data'][0]['value'] == "Json":
@@ -109,13 +109,18 @@ def onAction(data):
         elif data['data'][0]['value'] == "Html":
             parsedData = HtmlParser(data['data'][2]['value'], data['data'][1]['value'])
         
-        TPClient.createState(PLUGIN_ID + f".userState.{data['data'][3]['value']}", data['data'][3]['value'], str(parsedData))
+        if isinstance(parsedData, (dict, list)):
+            result = json.dumps(parsedData)
+        else:
+            result = str(parsedData)
+        
+        TPClient.createState(PLUGIN_ID + f".userState.{data['data'][3]['value']}", data['data'][3]['value'], result)
         
         g_log.debug(f"parsedData: {parsedData}")
 
 
 
-    if aid == TP_PLUGIN_ACTIONS['EditJson']['id']:
+    elif aid == TP_PLUGIN_ACTIONS['EditJson']['id']:
         the_data = data['data'][2]['value']
         path_to_find = data['data'][0]['value']
         change_to = data['data'][1]['value']
@@ -132,8 +137,9 @@ def onAction(data):
         g_log.info(f"Edit Json Action: {data}")
         
         
-    if aid == TP_PLUGIN_ACTIONS['WriteJson']['id']:
-        write_json_to_file(data['data'][0]['value'], data['data'][1]['value'], data['data'][2]['value'])
+    elif aid == TP_PLUGIN_ACTIONS['WriteJson']['id']:
+        ensure_ascii = data['data'][3]['value'].strip().lower() == 'true'
+        write_json_to_file(data['data'][0]['value'], data['data'][1]['value'], data['data'][2]['value'], ensure_ascii)
     else:
         g_log.warning("Got unknown action ID: " + aid)
 
